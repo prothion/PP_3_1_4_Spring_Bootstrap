@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" class="h-100" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" class="h-100"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>User Page</title>
+    <title>User</title>
 </head>
-<body>
 
+<body>
 <div>
     <table>
         <tr>
@@ -13,6 +15,15 @@
             <th th:text="${user.email}">email</th>
             <th>с уровнем доступа:</th>
             <th th:text="${user.getRolesToString()}">Role</th>
+        </tr>
+    </table>
+</div>
+<br>
+<div>
+    <table>
+        <tr>
+            <th><a href="/admin">Admin</a></th>
+            <th><a th:href="@{{id}(id=${user.id})}">User</a></th>
         </tr>
     </table>
 </div>
@@ -38,8 +49,10 @@
     </tr>
 </table>
 <br>
-<form th:action="@{/logout}" method="post">
-    <button type="submit">Выйти из учетной записи</button>
-</form>
+<nav>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Выйти из учетной записи</button>
+    </form>
+</nav>
 </body>
 </html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin page</title>
+</head>
+
+<body>
+<div>
+    <table>
+        <tr>
+            <th>Пользователь</th>
+            <th th:text="${user.email}">email</th>
+            <th>с уровнем доступа:</th>
+            <th th:text="${user.getRolesToString()}">Role</th>
+        </tr>
+    </table>
+</div>
+<br>
+
+<div>
+    <table>
+        <tr>
+            <th><a href="/admin">Admin</a></th>
+            <th><a th:href="@{admin/{id}(id=${user.id})}">User</a></th>
+        </tr>
+    </table>
+</div>
+
+<div>
+    <h3>Все пользователи</h3>
+</div>
+
+<table border="4">
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>LastName</th>
+        <th>Age</th>
+        <th>Car</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Время регистрации</th>
+    </tr>
+    <tr th:each="user :${users}">
+        <td th:text="${user.id}">ID</td>
+        <td th:text="${user.name}">Name</td>
+        <td th:text="${user.lastName}">Surname</td>
+        <td th:text="${user.age}">Age</td>
+        <td th:text="${user.car}">Car</td>
+        <td th:text="${user.email}">Email</td>
+        <td th:text="${user.roles}">Role</td>
+        <td th:text="${user.getTimeRegistration}"></td>
+        <td><a th:href="@{admin/{id}/edit(id=${user.id})}">Edit</a></td>
+        <td>
+            <form th:method="DELETE" th:action="@{admin/{id}/delete(id=${user.id})}">
+                <input type="submit" value="Delete">
+            </form>
+        </td>
+    </tr>
+</table>
+<br>
+<a th:href="@{admin/add}">Добавить ного пользователя</a>
+<br><br>
+<nav>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Выйти из учетной записи</button>
+    </form>
+</nav>
+</body>
+</html>
