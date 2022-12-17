@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:with="lang=${#locale.language}" th:lang="${lang}">
+
+<head th:fragment="htmlhead">
+    <meta charset="utf-8">
+    <title>Admin page</title>
+
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<header class="container-fluid d-flex flex-row align-items-center justify-content-between p-3 bg-dark text-white">
+    <div><b sec:authentication="name"/> with roles:
+        <th:block th:each="role : ${#authentication.authorities}">
+            &nbsp;<span th:text="${role.getName()}"/>
+        </th:block></div>
+    <div><a class="text-light" th:href="@{/logout}">Logout</a></div>
+</header>
+
+<div class="container-fluid d-flex flex-row vh-100 p-0">
+    <div th:fragment="navigation (admin)" class="bg-white">
+        <nav class="btn-group-vertical mt-3 mb-3">
+            <a sec:authorize="hasRole('ADMIN')" type="button" class="btn pl-5 pr-5 text-left" th:href="@{/admin}">Admin</a>
+            <a type="button" class="btn pl-5 pr-5 text-left" th:href="@{/user}">User</a>
+        </nav>
+    </div>
+
+    <div class="flex-grow-1 bg-light p-3">
+        <h1>Admin panel</h1>
+        <div class="container-fluid">
+            <nav>
+                <div class="nav nav-tabs border-bottom-0" id="nav-tab" role="tablist">
+                    <a class="nav-link active" id="nav-users_table-link" data-toggle="tab" href="#nav-users_table"
+                       role="tab" aria-controls="nav-users_table">Users table</a>
+                    <a class="nav-link" id="nav-user_form-link" data-toggle="tab" href="#nav-user_form"
+                       role="tab" aria-controls="nav-user_form">New user</a>
+                </div>
+            </nav>
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade show active" id="nav-users_table" role="tabpanel">
+                    <div class="row border">
+                        <h5 class="m-2">All users</h5>
+                    </div>
+                    <div class="row border bg-white pb-2">
+                        <table class="table table-borderless m-3">
+                            <thead>
+                            <tr class="border-top">
+                                <th scope="col">ID</th>
+                                <th scope="col">First name</th>
+                                <th scope="col">Last name</th>
+                                <th scope="col">Age</th>
+                                <th scope="col">E-mail</th>
+                                <th scope="col">Roles</th>
+                                <th scope="col">Edit</th>
+                                <th scope="col">Delete</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr class="border-top bg-light" th:each="user, rowStat : ${users}"
+                                th:classappend="${rowStat.count % 2 != 0 ? 'table-secondary' : 'table-light'}">
+                                <td th:text="${user.id}"/>
+                                <td th:text="${user.firstName}"/>
+                                <td th:text="${user.lastName}"/>
+                                <td th:text="${user.age}"/>
+                                <td th:text="${user.email}"/>
+                                <td>
+                                    <th:block th:each="role : ${user.getRoles()}">
+                                        &nbsp;<span th:text="${role.name}"/>
+                                    </th:block>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/{id}/profile(id=${user.id})}"
+                                       class="btn btn-sm btn-info edit-button">Edit</a>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/{id}/profile(id=${user.id})}"
+                                       class="btn btn-sm btn-danger delete-button">Delete</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="nav-user_form" role="tabpanel">
+                    <div class="row border">
+                        <h5 class="m-2">Add new user</h5>
+                    </div>
+                    <div class="row border bg-white pb-2">
+                        <div class="container col-6 form-group text-center">
+                            <form role="form" id="user-addform" th:action="@{/admin}" th:method="post" th:object="${user}">
+                                <div>
+                                    <label for="newFirstName">First name</label>
+                                    <input type="text" class="form-control" placeholder="Enter first name" th:field="*{firstName}" id="newFirstName">
+                                    <th:block th:if="${bindingResult} and ${bindingResult.hasFieldErrors('firstName')}">
+                                        <div class="invalid-feedback" th:each="error : ${bindingResult.getFieldErrors('firstName')}" th:text="${error.getDefaultMessage()}"/>
+                                    </th:block>
+                                </div>
+                                <div>
+                                    <label for="newLastName">Last name</label>
+                                    <input type="text" class="form-control" placeholder="Enter last name" th:field="*{lastName}" id="newLastName">
+                                </div>
+                                <div>
+                                    <label for="newAge">Age</label>
+                                    <input type="number" class="form-control" th:field="*{age}" id="newAge">
+                                    <th:block th:if="${bindingResult} and ${bindingResult.hasFieldErrors('age')}">
+                                        <div class="invalid-feedback" th:each="error : ${bindingResult.getFieldErrors('age')}" th:text="${error.getDefaultMessage()}"/>
+                                    </th:block>
+                                </div>
+                                <div>
+                                    <label for="newEmail">E-mail</label>
+                                    <input type="text" class="form-control" placeholder="Enter e-mail" th:field="*{email}" id="newEmail" autocomplete="username">
+                                    <th:block th:if="${bindingResult} and ${bindingResult.hasFieldErrors('email')}">
+                                        <div class="invalid-feedback" th:each="error : ${bindingResult.getFieldErrors('email')}" th:text="${error.getDefaultMessage()}"/>
+                                    </th:block>
+                                </div>
+                                <div>
+                                    <label for="newPassword">Password</label>
+                                    <input type="password" class="form-control" placeholder="Enter password" id="newPassword" name="password" autocomplete="current-password">
+                                    <th:block th:if="${bindingResult} and ${bindingResult.hasFieldErrors('password')}">
+                                        <div class="invalid-feedback" th:each="error : ${bindingResult.getFieldErrors('password')}" th:text="${error.getDefaultMessage()}"/>
+                                    </th:block>
+                                </div>
+                                <div>
+                                    <label for="newRoles">Role</label>
+                                    <select multiple class="form-control" id="newRoles" name="roles">
+                                        <option th:each="role : ${allRoles}"
+                                                th:selected="*{hasRole('__${role.id}__')}" th:text="${role.name}"
+                                                th:value="${role.id}">
+                                    </select>
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-success mt-3">Add new User</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="user-profile" class="modal fade">
+    <div class="modal-dialog">
+        <th:block th:if="${showUserProfile}">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Delete or edit user</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form role="form" id="userprofile-form" th:action="@{/admin}" th:method="post" th:object="${user}">
+                    <div class="modal-body">
+                        <div class="container col-6 text-center">
+                            <div class="form-group text-center">
+                                <input id="method" type="hidden" name="_method" value="post">
+                                <div>
+                                    <label for="id">ID</label>
+                                    <input type="text" class="form-control" th:field="*{id}" id="id" readonly>
+                                </div>
+                                <div>
+                                    <label for="firstName">First name</label>
+                                    <input type="text" class="form-control" th:field="*{firstName}" id="firstName">
+                                    <th:block th:if="${bindingResult} and ${bindingResult.hasFieldErrors('firstName')}">
+                                        <div class="invalid-feedback" th:each="error : ${bindingResult.getFieldErrors('firstName')}" th:text="${error.getDefaultMessage()}"/>
+                                    </th:block>
+                                </div>
+                                <div>
+                                    <label for="lastName">Last name</label>
+                                    <input type="text" class="form-control" th:field="*{lastName}" id="lastName">
+                                </div>
+                                <div>
+                                    <label for="age">Age</label>
+                                    <input type="number" class="form-control" th:field="*{age}" id="age">
+                                    <th:block th:if="${bindingResult} and ${bindingResult.hasFieldErrors('age')}">
+                                        <div class="invalid-feedback" th:each="error : ${bindingResult.getFieldErrors('age')}" th:text="${error.getDefaultMessage()}"/>
+                                    </th:block>
+                                </div>
+                                <div>
+                                    <label for="email">E-mail</label>
+                                    <input type="text" class="form-control" th:field="*{email}" id="email" autocomplete="username">
+                                    <th:block th:if="${bindingResult} and ${bindingResult.hasFieldErrors('email')}">
+                                        <div class="invalid-feedback" th:each="error : ${bindingResult.getFieldErrors('email')}" th:text="${error.getDefaultMessage()}"/>
+                                    </th:block>
+                                </div>
+                                <div id="password-div">
+                                    <label for="password">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password" autocomplete="current-password">
+                                </div>
+                                <div>
+                                    <label for="roles">Role</label>
+                                    <select multiple class="form-control" id="roles" name="roles">
+                                        <option th:each="role : ${allRoles}"
+                                                th:selected="*{hasRole('__${role.id}__')}" th:text="${role.name}"
+                                                th:value="${role.id}">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn submit">Save</button>
+                    </div>
+                </form>
+            </div>
+        </th:block>
+    </div>
+</div>
+
+<th:block th:fragment="footer">
+    <script type="text/javascript" src="/webjars/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+    <script th:src="@{/js/its.js}"></script>
+</th:block>
+
+<script th:inline="javascript">
+    $(document).ready(function () {
+        let userExists = [[${showUserProfile}]];
+        if (userExists) {
+            $('#user-profile .modal-header h3').text('Edit User');
+            $('#user-profile .modal-footer .submit').addClass('btn-primary');
+            $('#user-profile #method').val("patch");
+            $('#user-profile').modal("show");
+        }
+
+        let setNewUserFormTabpanel = [[${showNewUserForm}]];
+        if (setNewUserFormTabpanel) {
+            $('#nav-users_table-link').removeClass('active');
+            $('#nav-users_table').removeClass('show').removeClass('active');
+            $('#nav-user_form-link').addClass('active');
+            $('#nav-user_form').addClass('show').addClass('active');
+        }
+    });
+</script>
+</body>
+</html>
