@@ -1,41 +1,34 @@
 package ru.kata.spring.boot_security.demo.model;
 
 import org.springframework.security.core.GrantedAuthority;
-import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(name = "roles")
-public class Role implements GrantedAuthority {
+public final class Role extends AbstractEntity<Integer> implements GrantedAuthority {
+    private static final long serialVersionUID = 7217778059836250424L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
-    private Long id;
-
-    @Column(name = "name")
-    @NotEmpty(message = "Name of role should not be empty")
+    @Column(unique = true)
     private String name;
 
-    @Transient
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roles", cascade = CascadeType.MERGE)
+    @ManyToMany(mappedBy = "roles")
     private List<User> users = new ArrayList<>();
 
-    public Role() {}
+    public Role() {
+    }
 
     public Role(String name) {
         this.name = name;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public Role(Integer id) {
+        this.setId(id);
     }
 
     public String getName() {
@@ -46,34 +39,13 @@ public class Role implements GrantedAuthority {
         this.name = name;
     }
 
-    public List<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(List<User> users) {
-        this.users = users;
-    }
-
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Role)) return false;
-        Role role = (Role) o;
-        return Objects.equals(getId(), role.getId()) && Objects.equals(getName(), role.getName());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getName());
+    public String getAuthority() {
+        return name;
     }
 
     @Override
     public String toString() {
-        return getName();
-    }
-
-    @Override
-    public String getAuthority() {
-        return getName();
+        return String.format("Role [id = %d; name = %s;]", this.getId(), name);
     }
 }
